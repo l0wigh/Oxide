@@ -3,8 +3,8 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct Config {
     pub feeds: Vec<Feed>,
-    pub down_key: Option<char>,
-    pub up_key: Option<char>,
+    pub down: Option<char>,
+    pub up: Option<char>,
     pub select: Option<char>,
     pub back: Option<char>,
 }

@@ -10,10 +10,10 @@ You'll need to create a configuration file `~/.config/oxide/oxide.toml` with a f
 
 ```toml
 # Optionnal
-back = 'j'         # Default: Esc or h
-down_key = 'k'     # Default: Arrow Down or j
-up_key = 'l'       # Default: Arrow Up or k
-select = 'm'       # Default: Enter or l
+back = 'j'     # Default: Esc or h
+down = 'k'     # Default: Arrow Down or j
+up = 'l'       # Default: Arrow Up or k
+select = 'm'   # Default: Enter or l
 
 # Required
 feeds = [

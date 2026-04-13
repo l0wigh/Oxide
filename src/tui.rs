@@ -72,11 +72,11 @@ impl App {
 
     async fn handle_key_event(&mut self, mut key_event: KeyEvent) {
         if let KeyCode::Char(c) = key_event.code {
-            if c == self.config.down_key.unwrap_or('j') {
+            if c == self.config.down.unwrap_or('j') {
                 self.arrow_down();
                 return;
             }
-            if c == self.config.up_key.unwrap_or('k') {
+            if c == self.config.up.unwrap_or('k') {
                 self.arrow_up();
                 return;
             }
