@@ -2,10 +2,6 @@
 
 Oxide is an RSS Reader made in Rust. It's pretty simple and will not do much but it's currently enough for me.
 
-<p align="center", width="100%">
-	<img src"https://raw.githubusercontent.com/l0wigh/Oxide/refs/heads/master/oxide.png">
-</p>
-
 ![Screenshot of Oxide](https://raw.githubusercontent.com/l0wigh/Oxide/refs/heads/master/oxide.png)
 
 ## How to use
