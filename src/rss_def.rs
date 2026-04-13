@@ -1,21 +1,21 @@
-pub struct Article {
+pub struct OxideArticle {
     // pub guid: String,
     pub title: String,
-    // pub link: String,
+    pub link: String,
     pub content: String,
     // pub author: String,
     // pub published_at: String,
     pub is_read: bool,
 }
 
-impl From<rss::Item> for Article {
+impl From<rss::Item> for OxideArticle {
     fn from(item: rss::Item) -> Self {
         // let guid = item
         //     .guid()
         //     .map(|x| x.value().to_string())
         //     .unwrap_or_else(|| item.link().unwrap_or("no-id").to_string());
         let title = item.title().unwrap_or("No Title").to_string();
-        // let link = item.link().unwrap_or("").to_string();
+        let link = item.link().unwrap_or("").to_string();
         let content = item
             .extensions()
             .get("content")
@@ -34,10 +34,10 @@ impl From<rss::Item> for Article {
         //     .unwrap_or("Unknown Author")
         //     .to_string();
         // let published_at = item.pub_date().unwrap_or("Unknown date").to_string();
-        Article {
+        OxideArticle {
             // guid,
             title,
-            // link,
+            link,
             content,
             // author,
             // published_at,

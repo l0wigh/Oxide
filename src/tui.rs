@@ -7,12 +7,12 @@ use ratatui::{
     text::Line,
     widgets::{Block, Borders, List, ListState, Padding, Paragraph, StatefulWidget, Widget, Wrap},
 };
-use reqwest;
+use readability_rust::Readability;
 use tokio::io;
 use tui_markdown;
 
 use crate::config::Config;
-use crate::rss_def::Article;
+use crate::rss_def::OxideArticle;
 
 pub enum WinState {
     Feeds,
@@ -22,7 +22,7 @@ pub enum WinState {
 
 pub struct App {
     config: Config,
-    articles: Vec<Article>,
+    articles: Vec<OxideArticle>,
     article_state: ListState,
     article_content: Option<String>,
     feed_state: ListState,
@@ -39,7 +39,7 @@ impl App {
         feed_state.select(Some(0));
         Self {
             config,
-            articles: Vec::<Article>::new(),
+            articles: Vec::<OxideArticle>::new(),
             article_state,
             article_content: None,
             feed_state,
@@ -97,7 +97,7 @@ impl App {
                         self.win_state = WinState::Articles;
                         self.articles = match self.get_articles().await {
                             Ok(x) => x,
-                            Err(_) => Vec::<Article>::new(),
+                            Err(_) => Vec::<OxideArticle>::new(),
                         };
                         self.article_state.select(Some(0));
                     }
@@ -119,6 +119,21 @@ impl App {
                         }
                     }
                     WinState::Content => {
+                        if self.articles.len() == 0 {
+                            return;
+                        }
+                        let link = self.articles[self.article_state.selected().unwrap_or(0)]
+                            .link
+                            .clone();
+                        let new_content = self.get_html_link(link).await;
+                        match new_content {
+                            Ok(x) => {
+                                let md_content = html2text::from_read(x.as_bytes(), 1145)
+                                    .unwrap_or_else(|_| "Failed to parse the article".to_string());
+                                self.article_content = Some(md_content);
+                            }
+                            Err(_) => return,
+                        }
                         self.win_state = WinState::Content;
                     }
                 };
@@ -133,7 +148,7 @@ impl App {
                     WinState::Articles => {
                         self.win_state = WinState::Feeds;
                         self.article_state.select(Some(0));
-                        self.articles = Vec::<Article>::new();
+                        self.articles = Vec::<OxideArticle>::new();
                     }
                     WinState::Feeds => self.win_state = WinState::Feeds,
                 };
@@ -228,14 +243,29 @@ impl App {
         self.exit = true;
     }
 
-    async fn get_articles(&mut self) -> Result<Vec<Article>, Box<dyn std::error::Error>> {
+    async fn get_articles(&mut self) -> Result<Vec<OxideArticle>, Box<dyn std::error::Error>> {
         let index = self.feed_state.selected().unwrap_or(0);
         let url = &self.config.feeds[index].link;
         let response = reqwest::get(url).await?.bytes().await?;
 
         let channel = rss::Channel::read_from(&response[..])?;
-        let article: Vec<Article> = channel.items().iter().cloned().map(Article::from).collect();
+        let article: Vec<OxideArticle> = channel
+            .items()
+            .iter()
+            .cloned()
+            .map(OxideArticle::from)
+            .collect();
         Ok(article)
+    }
+
+    async fn get_html_link(&mut self, link: String) -> Result<String, Box<dyn std::error::Error>> {
+        let html = reqwest::get(link).await?.text().await?;
+        let mut parser = Readability::new(html.as_str(), None)?;
+        let res = match parser.parse() {
+            Some(x) => x.content.unwrap_or("Failed to read article".to_string()),
+            None => "Failed to read article".to_string(),
+        };
+        Ok(res)
     }
 }
 
